@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Responsive Music Player</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #121212;
+      --primary: #1db954;
+      --light: #f1f1f1;
+      --dark: #181818;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--light);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      background-image: url("https://media.istockphoto.com/id/147425746/vector/music-background.jpg?s=612x612&w=0&k=20&c=fSYvoKaRTO7b3u7BlyPaHWctPvBxkjIICLbuS74BIXc=");
+      background-size:99% 99%;
+      background-repeat: no-repeat;
+    }
+
+    .player {
+      background-color: rgba(109, 27, 197, 0.343);
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .cover img {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      margin-bottom: 1rem;
+      border: 5px solid var(--primary);
+      animation: spin 15s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .controls button {
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .controls button:hover {
+      background: #1ed760;
+    }
+
+    .progress-container {
+      background: #333;
+      border-radius: 5px;
+      height: 8px;
+      width: 100%;
+      margin-top: 1.2rem;
+      cursor: pointer;
+    }
+
+    .progress {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      border-radius: 5px;
+      transition: width 0.3s ease;
+    }
+
+    .song-info {
+      margin-bottom: 1rem;
+    }
+
+    .song-info h2, .song-info h3 {
+      margin: 0.2rem 0;
+    }
+
+    @media (max-width: 480px) {
+      .cover img {
+        width: 140px;
+        height: 140px;
+      }
+      .controls button {
+        font-size: 1.2rem;
+        padding: 0.3rem 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="player">
+    <div class="cover"><img src="cover1.jpg" alt="Album Art" id="album-art"></div>
+    <div class="song-info">
+      <h2 id="title">Song Title</h2>
+      <h3 id="artist">Artist</h3>
+    </div>
+
+    <audio id="audio" src="song1.mp3"></audio>
+
+    <div class="controls">
+      <button id="prev">⏮</button>
+      <button id="play">▶️</button>
+      <button id="next">⏭</button>
+    </div>
+
+    <div class="progress-container" id="progress-container">
+      <div class="progress" id="progress"></div>
+    </div>
+  </div>
+
+  <script>
+    const songs = [
+      { name: 'song1', title: 'Shape of You', artist: 'Ed Sheeran', cover: 'cover1.jpg' },
+      { name: 'song2', title: 'Blinding Lights', artist: 'The Weeknd', cover: 'cover2.jpg' },
+      { name: 'song3', title: 'Levitating', artist: 'Dua Lipa', cover: 'cover3.jpg' }
+    ];
+
+    let songIndex = 0;
+    let isPlaying = false;
+
+    const audio = document.getElementById('audio');
+    const title = document.getElementById('title');
+    const artist = document.getElementById('artist');
+    const albumArt = document.getElementById('album-art');
+    const playBtn = document.getElementById('play');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    const progress = document.getElementById('progress');
+    const progressContainer = document.getElementById('progress-container');
+
+    function loadSong(song) {
+      title.textContent = song.title;
+      artist.textContent = song.artist;
+      audio.src = `${song.name}.mp3`;
+      albumArt.src = song.cover;
+    }
+
+    function playSong() {
+      isPlaying = true;
+      audio.play();
+      playBtn.textContent = '⏸';
+    }
+
+    function pauseSong() {
+      isPlaying = false;
+      audio.pause();
+      playBtn.textContent = '▶️';
+    }
+
+    playBtn.addEventListener('click', () => {
+      isPlaying ? pauseSong() : playSong();
+    });
+
+    prevBtn.addEventListener('click', () => {
+      songIndex = (songIndex - 1 + songs.length) % songs.length;
+      loadSong(songs[songIndex]);
+      playSong();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      songIndex = (songIndex + 1) % songs.length;
+      loadSong(songs[songIndex]);
+      playSong();
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      const { duration, currentTime } = audio;
+      const progressPercent = (currentTime / duration) * 100;
+      progress.style.width = `${progressPercent}%`;
+    });
+
+    progressContainer.addEventListener('click', (e) => {
+      const width = progressContainer.clientWidth;
+      const clickX = e.offsetX;
+      const duration = audio.duration;
+      audio.currentTime = (clickX / width) * duration;
+    });
+
+    loadSong(songs[songIndex]);
+  </script>
+</body>
+</html>
